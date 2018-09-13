@@ -54,7 +54,8 @@
 ```
 #### 局限性:(不支持的使用场景)
 
-按照 (@AnotherJack)[https://github.com/AnotherJack/AvoidOnResult/issues/4#issuecomment-420620079] 提出来的思路,写了测试代码实际验证后发现的确存在问题.
+按照 [@AnotherJack](https://github.com/AnotherJack) 在 [AvoidOnResult 的 issues](https://github.com/AnotherJack/AvoidOnResult/issues/4#issuecomment-420620079) 里提出来的建议,写了测试代码实际验证后发现**的确存在**问题.
+
 > 创建listener的代码是在点击事件中，在OnClickListener中，是不是这个构造器的参数类型就不是外部Activity而是OnClickListener了
 
 ##### 不支持的使用场景 - 示范代码1:
