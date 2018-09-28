@@ -14,6 +14,7 @@
 1. 实现的方式有参考性(有别于网上已知的方案)
 1. 实现了"非匿名回调"里 调用 时,能解决上层 Activity 被 **Destroy** 后,返回时正常触发回调.(参考"局限性"一节的错误示范代码)
 1. 假如不考虑 "上层 Activity 被 **Destroy** 后能正常回调错误示范场景下"的情况,那么功能应该和网上已知方案是一致的.
+1. 支持大部分"简单情况下"的匿名函数里调用startActivityForResult，如常见控件的事件里等.
 
 #### 核心代码
 
@@ -54,11 +55,14 @@
 ```
 #### 局限性:(不支持的使用场景)
 
-按照 [@AnotherJack](https://github.com/AnotherJack) 在 [AvoidOnResult 的 issues](https://github.com/AnotherJack/AvoidOnResult/issues/4#issuecomment-420620079) 里提出来的建议,写了测试代码实际验证后发现**的确存在**问题.
+按照 [@AnotherJack](https://github.com/AnotherJack) 在 [AvoidOnResult 的 issues](https://github.com/AnotherJack/AvoidOnResult/issues/4#issuecomment-420620079) 里提出来的建议,写了测试代码实际验证后发现**的确存在**问题.(新版本`180912.03.01.004`部分解决了此问题)
 
 > 创建listener的代码是在点击事件中，在OnClickListener中，是不是这个构造器的参数类型就不是外部Activity而是OnClickListener了
 
 ##### 不支持的使用场景 - 示范代码1:
+
+匿名类里带变量的情况.简单的通过反射实例化的话可能会导致数据状态不一致.所以新版本`180912.03.01.004`也不支持此类情况.
+
 ```java
         this.btnLogin.setOnClickListener(new OnClickListener()
         {
@@ -80,7 +84,10 @@
         });
 ```
 
-##### 不支持的使用场景 - 示范代码2:
+##### <del>不支持的使用场景 - 示范代码2:</del>
+
+新版本`180912.03.01.004`已经可以支持此类情况.
+
 ```java
         this.btnLogin.setOnClickListener(new OnClickListener()
         {
@@ -99,6 +106,7 @@
         });
 ```
 
+
 ##### 错误提示:
 ```java
 System.err: java.lang.IllegalArgumentException: argument 1 should have type LoginActivity$5, got LoginActivity
@@ -112,11 +120,35 @@ System.err: java.lang.IllegalArgumentException: argument 1 should have type Logi
 
 ##### 局限性小结:
 
->必须保证 `OnActivityResultListener的匿名回调类` 的 `new`生成 是在 **其子类直属 范围内** 即可.  
->不能在匿名函数里再 `new OnActivityResultListener` 出来调用.  
+>必须保证 `OnActivityResultListener的匿名回调类` 的 `new`生成 是在 **其子类直属 范围内** 即可. 
+>不能在匿名函数里再 `new OnActivityResultListener` 出来调用. 
+
+Update:
+>新版本`180912.03.01.004`解决了此问题的**部分**情况.
 
 
 ### 使用代码
+
+#### 正确的使用方式 - 代码示范0:
+新版本`180912.03.01.004`支持大部分"简单情况下"的匿名函数里调用startActivityForResult，如常见控件的事件里等.
+
+```java
+        this.btnLogin.setOnClickListener(new OnClickListener()
+        {
+            @Override
+            public void onClick(final View v)
+            {
+                startActivityForResult(new Intent(getApplicationContext(), ServerSettingActivity.class), new OnActivityResultListener()
+                {
+                    @Override
+                    public void onActivityResult(final int resultCode, final Intent data)
+                    {
+                        ToastEx.makeTextAndShowLong(" resultCode=" + resultCode);
+                    }
+                });
+            }
+        });
+```
 
 #### 正确的使用方式 - 代码示范1:
 ```java
@@ -234,4 +266,4 @@ public class LoginActivity extends BaseActivity implements OnClickListener
 3.  [EasyAndroid基础集成组件库之：EasyActivityResult 拒绝臃肿的onActivityResult代码 - 掘金](https://juejin.im/post/5b21d019e51d4506d93701ba)
 
 @author AsionTang   
-@version 180912.01.01.001 
+@version 180912.02.01.003 
